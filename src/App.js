@@ -1,4 +1,5 @@
 import { useState } from "react";
+import StarRating from "./components/StarRating";
 
 const tempMovieData = [
   {
@@ -49,6 +50,7 @@ const tempWatchedData = [
 
 export default function App() {
   const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
 
   return (
     <>
@@ -59,9 +61,15 @@ export default function App() {
       </NavigationBar>
 
       <main className="main">
-        <SearchResultList movies={movies} />
+        <ListBox>
+          <SearchResultList movies={movies} />
+        </ListBox>
 
-        <WatchedMoviesContainer />
+        <ListBox>
+          <WatchedMoviesSum watched={watched} />
+
+          <WatchedMoviesList watched={watched} />
+        </ListBox>
       </main>
     </>
   );
@@ -88,23 +96,25 @@ function SearchResultsNum({ movies }) {
   );
 }
 
-function SearchResultList({ movies }) {
-  const [isOpen1, setIsOpen1] = useState(true);
+function ListBox({ children }) {
+  const [isOpen, setIsOpen] = useState(true);
 
   return (
     <div className="box">
-      <Btn onClick={() => setIsOpen1((open) => !open)}>
-        {isOpen1 ? "–" : "+"}
-      </Btn>
+      <Btn onClick={() => setIsOpen((open) => !open)}>{isOpen ? "–" : "+"}</Btn>
 
-      {isOpen1 && (
-        <ul className="list">
-          {movies?.map((movie) => (
-            <SearchedMovie movie={movie} />
-          ))}
-        </ul>
-      )}
+      {isOpen && children}
     </div>
+  );
+}
+
+function SearchResultList({ movies }) {
+  return (
+    <ul className="list">
+      {movies?.map((movie) => (
+        <SearchedMovie movie={movie} />
+      ))}
+    </ul>
   );
 }
 
@@ -120,27 +130,6 @@ function SearchedMovie({ movie }) {
         </p>
       </div>
     </li>
-  );
-}
-
-function WatchedMoviesContainer({}) {
-  const [watched, setWatched] = useState(tempWatchedData);
-  const [isOpen2, setIsOpen2] = useState(true);
-
-  return (
-    <div className="box">
-      <Btn onClick={() => setIsOpen2((open) => !open)}>
-        {isOpen2 ? "–" : "+"}
-      </Btn>
-
-      {isOpen2 && (
-        <>
-          <WatchedMoviesSum watched={watched} />
-
-          <WatchedMoviesList watched={watched} />
-        </>
-      )}
-    </div>
   );
 }
 
