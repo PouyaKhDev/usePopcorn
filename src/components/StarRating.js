@@ -1,6 +1,25 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
-function StarRating({ maxRating = 10 }) {
+StarRating.propTypes = {
+  maxRating: PropTypes.number,
+  fillColor: PropTypes.string,
+  borderColor: PropTypes.string,
+  size: PropTypes.string,
+  messages: PropTypes.array,
+  defaultRating: PropTypes.number,
+  setRating: PropTypes.func,
+};
+
+function StarRating({
+  maxRating = 5,
+  fillColor = "#FFD819",
+  borderColor = "#FFD819",
+  size = "2rem",
+  messages = [],
+  defaultRating = 0,
+  setRating,
+}) {
   const containerStyle = {
     display: "flex",
     alignItems: "center",
@@ -14,10 +33,14 @@ function StarRating({ maxRating = 10 }) {
   const textStyle = {
     lineHeight: "1",
     margin: "0",
+    fontSize: size,
+    color: fillColor,
   };
 
-  const [curRating, setCurRating] = useState(0);
-  const [tmpRating, setTmpRating] = useState(0);
+  const [curRating, setCurRating] = useState(
+    defaultRating > maxRating ? maxRating : defaultRating
+  );
+  const [tmpRating, setTmpRating] = useState(curRating);
 
   const handleRating = function (e) {
     const element = e.target.closest("span");
@@ -28,6 +51,7 @@ function StarRating({ maxRating = 10 }) {
     );
 
     setCurRating(elIndex + 1);
+    setRating?.(elIndex + 1);
   };
 
   const handleHoverEnter = function (index) {
@@ -38,41 +62,59 @@ function StarRating({ maxRating = 10 }) {
     setTmpRating(curRating);
   };
 
+  const handleMessage = function (messagesArr) {
+    if (!tmpRating || !messagesArr.length) return "";
+
+    const showMessageIndex = Math.ceil(
+      tmpRating / Math.round(maxRating / messagesArr.length)
+    );
+
+    return messagesArr[showMessageIndex - 1];
+  };
+
   return (
     <div style={containerStyle}>
       <div style={starContainerStyle} onClick={(e) => handleRating(e, false)}>
         {Array.from({ length: maxRating }, (_, i) => (
           <Star
             key={i}
-            fillColor={i < tmpRating ? "#FFD819" : "transparent"}
-            borderColor={"#FFD819"}
+            fillColor={i < tmpRating ? fillColor : "transparent"}
+            borderColor={borderColor}
+            size={size}
             onMouseEnter={() => handleHoverEnter(i + 1)}
             onMouseLeave={handleHoverLeave}
-            width={"2.5rem"}
           />
         ))}
       </div>
       <p style={textStyle}>{tmpRating || ""}</p>
+      <p style={textStyle}>{handleMessage(messages)}</p>
     </div>
   );
 }
 
 function Star({
-  fillColor,
-  borderColor,
+  fillColor = "#FFD819",
+  borderColor = "#FFD819",
+  size = "2rem",
   onMouseEnter = () => {},
   onMouseLeave = () => {},
-  width,
+  onClick = () => {},
 }) {
   const iconStyle = {
-    width: width,
-    height: width,
+    size: size,
+    height: size,
     fill: fillColor,
     stroke: borderColor,
+    cursor: "pointer",
   };
 
   return (
-    <span role="button" onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+    <span
+      role="button"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onclick}
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
